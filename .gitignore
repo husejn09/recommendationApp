@@ -1,0 +1,10 @@
+backend/.env
+backend/node_modules
+
+.vscode/
+.idea/
+
+*.log
+*.tmp
+
+.DS_Store
