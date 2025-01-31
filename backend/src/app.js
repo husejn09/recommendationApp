@@ -1,6 +1,9 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import userRoutes from "./routes/userRoutes.js"
+import bookmarkRoutes from "./routes/bookmarkRoutes.js";
+import preferenceRoutes from "./routes/preferenceRoutes.js"
 
 const app = express();
 
@@ -12,5 +15,14 @@ app.use(helmet());
 app.get("/test", (req, res) =>{
     res.send("API is running");;
 })
+
+// User routes
+app.use("/users", userRoutes);
+
+// bookmark routes
+app.use("/bookmarks", bookmarkRoutes);
+
+// preferences routes
+app.use("/preferences", preferenceRoutes);
 
 export default app;
