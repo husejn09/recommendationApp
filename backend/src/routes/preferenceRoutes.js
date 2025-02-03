@@ -13,3 +13,5 @@ router.post("/removePreference", authenticateUser, removePreferences);
 
 // Get all preferences
 router.get("/getPreferences", authenticateUser, getAllPreferences);
+
+export default router;
