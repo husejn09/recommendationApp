@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
-const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
-const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
+const TMDB_BASE_URL = process.env.TMDB_BASE_URL;
+const TMDB_IMAGE_BASE_URL = process.env.TMDB_IMAGE_BASE_URL;
 
  // Get movie recommendations based on a genre and mood.
 
@@ -37,7 +37,7 @@ const transformMovie = (movie, genresMapping) => {
       .filter(Boolean);
   
     const releaseYear = movie.release_date ? movie.release_date.split('-')[0] : '';
-  
+
     return {
       id: movie.id,
       title: movie.title,
@@ -54,7 +54,8 @@ const transformMovie = (movie, genresMapping) => {
     
     let params = {
       api_key: TMDB_API_KEY,
-      with_genres: genre, 
+      with_genres: genre,
+      'vote_average.gte': 6 
     };
    
     if (mood === 'happy') {
@@ -121,7 +122,6 @@ const transformMovie = (movie, genresMapping) => {
           rating: serie.vote_average,
           overview: serie.overview
         };
-        // return {serie}
 
       });
   };

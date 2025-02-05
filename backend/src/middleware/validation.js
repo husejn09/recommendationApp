@@ -16,9 +16,9 @@ export const validateUserInput = (req, res, next) => {
 
 // validation function to check if bookmark fields are populated
 export const validateBookmark = (req, res, next) => {
-    const { user_id, type, name, data } = req.body;
+    const { user_id, type, data } = req.body;
 
-    if (!user_id || !type || !name || !data) {
+    if (!user_id || !type || !data) {
         return res.status(400).json({ message: "Missing required fields." });
     }
 

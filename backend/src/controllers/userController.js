@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
-import { createUser, getUserByEmail } from "../models/userModel.js";
+import { createUser, getUserByEmail, saveRefreshToken, deleteRefreshToken, getRefreshToken } from "../models/userModel.js";
 
 dotenv.config();
 
@@ -11,49 +11,125 @@ export const registerUser = async (req, res) => {
     const {name, email, password} = req.body;
 
     try {
-
         const existingUser = await getUserByEmail(email);
-        if(existingUser) {
-            return res.status(400).json({message: "User already exists"});
-        }
-        // hashing the password
-        const hashPassword = await bcrypt.hash(password, 10);
+        if(existingUser) return res.status(400).json({message: "User already exists"});
 
-        // create a new user with createUser function from userModel
+        const hashPassword = await bcrypt.hash(password, 10);
         const newUser = await createUser(name, email, hashPassword);
 
-        const token = jwt.sign({userId: newUser.user_id}, process.env.JWT_SECRET, {
-            expiresIn: "1h"
-        })
+        // Generate both tokens like in login
+        const token = jwt.sign({userId: newUser.user_id}, process.env.JWT_SECRET, {expiresIn: "1h"});
+        const refreshToken = jwt.sign(
+            { userId: newUser.user_id },
+            process.env.JWT_REFRESH_SECRET,
+            { expiresIn: "30d" }
+        );
 
-        res.status(201).json({ user: newUser, token});
+        await saveRefreshToken(newUser.user_id, refreshToken);
+
+        res.status(201).json({ 
+            user: newUser, 
+            token,
+            refreshToken // Add refresh token to response
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
 
+// Updated loginUser function
 export const loginUser = async (req, res) => {
-    const {email, password} = req.body;
+    const { email, password } = req.body;
 
     try {
-        // call the function getUserByEmail from userModels and find the user by email
         const user = await getUserByEmail(email);
-        if(!user){
-            return res.status(404).json({ error: "User not found"})
-        }
+        const genericError = "Invalid email or password";
+
+        if (!user) return res.status(401).json({ error: genericError });
         
         const isPassword = await bcrypt.compare(password, user.password);
-        if(!isPassword){
-            return res.status(401).json({ error: "Invalid password"});
-        } 
+        if (!isPassword) return res.status(401).json({ error: genericError });
 
-        const token = jwt.sign({userId: user.user_id}, process.env.JWT_SECRET, {
-            expiresIn: "1h"
+        // Generate tokens
+        const token = jwt.sign(
+            { userId: user.user_id }, 
+            process.env.JWT_SECRET, 
+            { expiresIn: "1h" }
+        );
+
+        const refreshToken = jwt.sign(
+            { userId: user.user_id },
+            process.env.JWT_REFRESH_SECRET,
+            { expiresIn: "30d" }
+        );
+
+        // Store refresh token in DB
+        await saveRefreshToken(user.user_id, refreshToken);
+
+        res.status(200).json({ 
+            user, 
+            token, 
+            refreshToken 
         });
 
-        res.status(200).json({ user, token });
     } catch (error) {
-        res.status(500).json({ error: error.message});
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Updated refreshTokenHandler
+export const refreshTokenHandler = async (req, res) => {
+    const { refreshToken } = req.body;
+    
+    if (!refreshToken) {
+        return res.status(401).json({ error: "Refresh token missing" });
+    }
+
+    try {
+        // Verify token and check DB
+        const payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+        const storedToken = await getRefreshToken(refreshToken);
+        
+        if (!storedToken) {
+            return res.status(403).json({ error: "Invalid refresh token" });
+        }
+
+        // Generate new tokens
+        const newAccessToken = jwt.sign(
+            { userId: payload.userId },
+            process.env.JWT_SECRET,
+            { expiresIn: "1h" }
+        );
+
+        const newRefreshToken = jwt.sign(
+            { userId: payload.userId },
+            process.env.JWT_REFRESH_SECRET,
+            { expiresIn: "30d" }
+        );
+
+        // Update refresh token in DB
+        await deleteRefreshToken(refreshToken);
+        await saveRefreshToken(payload.userId, newRefreshToken);
+
+        res.status(200).json({ 
+            accessToken: newAccessToken,
+            refreshToken: newRefreshToken
+        });
+
+    } catch (error) {
+        res.status(403).json({ error: "Invalid refresh token" });
+    }
+};
+
+// Add logout handler
+export const logoutUser = async (req, res) => {
+    const { refreshToken } = req.body;
+    
+    try {
+        await deleteRefreshToken(refreshToken);
+        res.status(200).json({ message: "Logged out successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 };

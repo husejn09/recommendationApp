@@ -19,3 +19,24 @@ export const getUserByEmail = async (email) => {
     const result = await pool.query(query, values);
     return result.rows[0];
 }
+
+// Add these functions to handle refresh tokens
+// Update saveRefreshToken to handle multiple devices:
+export const saveRefreshToken = async (userId, token) => {
+    const query = `
+        INSERT INTO refresh_tokens (user_id, token)
+        VALUES ($1, $2)
+    `;
+    await pool.query(query, [userId, token]);
+};
+
+export const getRefreshToken = async (token) => {
+    const query = 'SELECT * FROM refresh_tokens WHERE token = $1';
+    const result = await pool.query(query, [token]);
+    return result.rows[0];
+};
+
+export const deleteRefreshToken = async (token) => {
+    const query = 'DELETE FROM refresh_tokens WHERE token = $1';
+    await pool.query(query, [token]);
+};

@@ -6,12 +6,12 @@ import { validateBookmark } from "../middleware/validation.js";
 const router = express.Router();
 
 // Insert bookmarks
-router.post("/insertBookmark", authenticateUser, validateBookmark, createBookmark);
+router.post("/insertBookmark",  validateBookmark, createBookmark);
 
 // Remove bookmarks
-router.post("/removeBookmark", authenticateUser, validateBookmark, removeBookmark);
+router.post("/removeBookmark", removeBookmark);
 
 // Get all bookmarks
-router.get("/:user_id", authenticateUser, getAllBookmarks);
+router.get("/:user_id",  getAllBookmarks);
 
 export default router;

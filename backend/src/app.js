@@ -6,11 +6,21 @@ import bookmarkRoutes from "./routes/bookmarkRoutes.js";
 import preferenceRoutes from "./routes/preferenceRoutes.js"
 import spotifyRoutes from "./routes/spotifyRoutes.js";
 import tmdbRoutes from './routes/tmdbRoutes.js';
+import { rateLimit } from 'express-rate-limit'
+
+const limiter = rateLimit({
+    windowMs: 2 * 60 * 1000, 
+    max: 20, 
+  }); 
+
 
 const app = express();
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: '*', 
+    methods: ['POST', 'GET']
+}));
 app.use(helmet());
 
 // testing the server with get api
