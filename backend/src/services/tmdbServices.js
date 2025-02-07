@@ -146,7 +146,7 @@ const transformMovie = (movie, genresMapping) => {
       seasons: data.number_of_seasons,
       episodes: data.number_of_episodes,
       status: data.status,
-      next_air_date: data.next_episode_to_air,
+      last_air_date: data.last_air_date,
       air_years: data.first_air_date
         ? `${data.first_air_date.substring(0, 4)} - ${
             data.in_production
