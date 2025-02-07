@@ -44,7 +44,7 @@ const transformMovie = (movie, genresMapping) => {
       genres: movieGenreNames,
       poster: movie.poster_path ? `${TMDB_IMAGE_BASE_URL}${movie.poster_path}` : null,
       releaseYear,
-      rating: movie.vote_average?.toFixed(1),
+      rating: movie.vote_average ? movie.vote_average.slice(0, 3) : null,
       overview: movie.overview
     };
   };
@@ -121,7 +121,7 @@ const transformMovie = (movie, genresMapping) => {
           genres: serieGenreNames,
           poster: serie.poster_path ? `${TMDB_IMAGE_BASE_URL}${serie.poster_path}` : null,
           releaseYear,
-          rating: serie.vote_average?.toFixed(1),
+          rating: serie.vote_average ? serie.vote_average.slice(0, 3) : null,
           overview: serie.overview
         };
 
