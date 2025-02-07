@@ -55,8 +55,7 @@ const transformMovie = (movie, genresMapping) => {
     let params = {
       api_key: TMDB_API_KEY,
       with_genres: genre,
-      'vote_average.gte': 6,
-      page: 3
+      'vote_average.gte': 6
     };
    
     if (mood === 'happy') {
@@ -79,14 +78,14 @@ const transformMovie = (movie, genresMapping) => {
   };
 
 
+
  // Get series (TV shows) recommendations based on a genre and mood.
 
  export const getSeriesRecommendations = async (genre, mood) => {
     let params = {
       api_key: TMDB_API_KEY,
       with_genres: genre,
-      'vote_average.gte': 6, // average rating more than this value
-      page: 3
+      'vote_average.gte': 6 // average rating more than this value
     };
   
     if (mood === 'happy') {
@@ -127,3 +126,5 @@ const transformMovie = (movie, genresMapping) => {
 
       });
   };
+
+
