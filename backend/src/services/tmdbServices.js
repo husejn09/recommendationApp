@@ -127,4 +127,26 @@ const transformMovie = (movie, genresMapping) => {
       });
   };
 
-
+  export const fetchSeriesDetails = async (id) => {
+    try {
+      const response = await axios.get(
+        `https://api.themoviedb.org/3/tv/${id}`,
+        { params: { api_key: process.env.TMDB_API_KEY } }
+      );
+  
+      return formatSeriesData(response.data);
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  };
+  
+  const formatSeriesData = (data) => {
+    return {
+      title: data.name,
+      seasons: data.number_of_seasons,
+      episodes: data.number_of_episodes,
+      status: data.status,
+      next_air_date: data.next_episode_to_air?.air_date || "N/A",
+      runtime: data.episode_run_time?.length ? data.episode_run_time[0] : "N/A",
+    };
+  };

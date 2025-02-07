@@ -1,4 +1,4 @@
-import { getMovieRecommendations, getSeriesRecommendations, getMoviesGenres, getSeriesGenres } from '../services/tmdbServices.js';
+import { getMovieRecommendations, getSeriesRecommendations, getMoviesGenres, getSeriesGenres, fetchSeriesDetails } from '../services/tmdbServices.js';
 
 export const movieRecommendations = async (req, res) => {
   try {
@@ -37,3 +37,12 @@ export const seriesGenres = async (req, res) => {
         res.status(500).josn({ error: error.message })
     }
 }
+
+export const getSeriesDetails = async (req, res) => {
+  try {
+    const seriesDetails = await fetchSeriesDetails(req.params.id);
+    res.json(seriesDetails);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
