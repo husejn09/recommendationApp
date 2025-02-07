@@ -44,7 +44,7 @@ const transformMovie = (movie, genresMapping) => {
       genres: movieGenreNames,
       poster: movie.poster_path ? `${TMDB_IMAGE_BASE_URL}${movie.poster_path}` : null,
       releaseYear,
-      rating: movie.vote_average,
+      rating: movie.vote_average?.toFixed(1),
       overview: movie.overview
     };
   };
@@ -55,7 +55,8 @@ const transformMovie = (movie, genresMapping) => {
     let params = {
       api_key: TMDB_API_KEY,
       with_genres: genre,
-      'vote_average.gte': 6 
+      'vote_average.gte': 6,
+      page: 3
     };
    
     if (mood === 'happy') {
@@ -84,7 +85,8 @@ const transformMovie = (movie, genresMapping) => {
     let params = {
       api_key: TMDB_API_KEY,
       with_genres: genre,
-      'vote_average.gte': 6 // average rating more than this value
+      'vote_average.gte': 6, // average rating more than this value
+      page: 3
     };
   
     if (mood === 'happy') {
@@ -119,7 +121,7 @@ const transformMovie = (movie, genresMapping) => {
           genres: serieGenreNames,
           poster: serie.poster_path ? `${TMDB_IMAGE_BASE_URL}${serie.poster_path}` : null,
           releaseYear,
-          rating: serie.vote_average,
+          rating: serie.vote_average?.toFixed(1),
           overview: serie.overview
         };
 
