@@ -147,6 +147,14 @@ const transformMovie = (movie, genresMapping) => {
       episodes: data.number_of_episodes,
       status: data.status,
       next_air_date: data.next_episode_to_air?.air_date || "N/A",
-      runtime: data.episode_run_time?.length ? data.episode_run_time[0] : "N/A",
+      air_years: data.first_air_date
+        ? `${data.first_air_date.substring(0, 4)} - ${
+            data.in_production
+              ? "Present"
+              : data.last_air_date
+              ? data.last_air_date.substring(0, 4)
+              : "N/A"
+          }`
+        : "N/A",
     };
   };
