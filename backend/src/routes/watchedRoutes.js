@@ -1,5 +1,5 @@
 import express from 'express';
-import { getWatched, toggleWatched } from '../controllers/watchedItemsController';
+import { getWatched, toggleWatched } from '../controllers/watchedItemsController.js';
 
 const router = express.Router();
 
