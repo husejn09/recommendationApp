@@ -1,4 +1,4 @@
-import WatchedModel from ('../models/watchedItemsModel.js');
+import WatchedModel from '../models/watchedItemsModel.js';
 
 export const toggleWatched = async (req, res) => {
     try {
