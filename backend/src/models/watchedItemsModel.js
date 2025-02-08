@@ -1,6 +1,7 @@
+
 import pool from "../config/db.js";
 
-export const WatchedModel = {
+const WatchedModel = {
   async getForUser(userId) {
     const { rows } = await pool.query(
       'SELECT * FROM watched_items WHERE user_id = $1',
@@ -31,3 +32,5 @@ export const WatchedModel = {
   }
 };
 
+// Export as default
+export default WatchedModel;
