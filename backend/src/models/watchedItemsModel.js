@@ -2,6 +2,22 @@
 import pool from "../config/db.js";
 
 const WatchedModel = {
+
+  async getForUser(userId) {
+    try {
+      console.log("Executing query to fetch watched items for userId:", userId);
+      const { rows } = await pool.query(
+        'SELECT * FROM watched_items WHERE user_id = $1',
+        [userId]
+      );
+      console.log("Query result:", rows);
+      return rows;
+    } catch (error) {
+      console.error("Database query error in getForUser:", error);
+      throw error;
+    }
+  },
+
   async toggle(userId, item) {
     try {
       const existing = await pool.query(
