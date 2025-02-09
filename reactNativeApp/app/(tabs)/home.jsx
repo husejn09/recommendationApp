@@ -49,7 +49,7 @@ const Home = () => {
           <View className="my-6 px-4 space-y-6">
             <View className="justify-between items-start flex-row mb-6 "> 
                 <View className="mt-1.5"> 
-                  <Text className="font-medium text-sm text-gray-100">
+                  <Text className="font-medium text-sm text-gray-100 ml-2">
                     Welcome Back
                   </Text>
                   <Text className="font-semibold text-xl text-white text-center">
@@ -59,7 +59,7 @@ const Home = () => {
                 <View className="-mr-6 -mt-4">
                     <Image
                       source={logo}
-                      className="w-28 h-24"
+                      className="w-36 h-32 -mt-4 "
                       resizeMode='contain' 
                     />
                 </View>
