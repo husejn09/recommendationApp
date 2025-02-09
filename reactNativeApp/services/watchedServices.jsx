@@ -10,7 +10,6 @@ export const getWatched = async () => {
     });
     return response.data;
   } catch (error) {
-    console.error("Error fetching watched items:", error);
     return [];
   }
 };
@@ -24,7 +23,6 @@ export const toggleWatched = async (item) => {
       });
       return response.data;
     } catch (error) {
-      console.error("Toggle watched error:", error);
       throw error;
     }
   };

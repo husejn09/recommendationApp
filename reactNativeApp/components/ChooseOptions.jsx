@@ -85,8 +85,7 @@ const ChooseOptions = ({ recommendationType}) => {
 
     const url = recommendationType === "series" ? SERIES : MOVIES;
     try {
-        console.log(recommendationType);
-        console.log(selectedGenre);
+
       const response = await axios.post(
         url,
         { genre: selectedGenre }
@@ -98,15 +97,15 @@ const ChooseOptions = ({ recommendationType}) => {
         setDataFromAPI(response.data.movies);
       }
       else{
-        Toast.show({
-                  type: "error",
-                  text1: "Error!",
-                  text2: "This feature got depricated by Spotify",
-                });
       }
     } catch (error) {
-      console.error("Error fetching recommendations:", error.response?.data || error.message);
+
     } finally {
+        Toast.show({
+            type: "success",
+            text1: "Success!",
+            text2: `✅ Scroll down to see recommendations `,
+          });
         setShowRecomm(true);
       setLoading(false);
     }
@@ -114,7 +113,6 @@ const ChooseOptions = ({ recommendationType}) => {
   
   return (
     <>
-      <Toast position="bottom" bottomOffset={20} />
       <Text className="text-center text-2xl text-white mt-10 font-semibold">
         What could you watch today?
       </Text>

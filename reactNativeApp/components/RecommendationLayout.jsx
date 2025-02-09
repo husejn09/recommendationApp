@@ -48,7 +48,6 @@ const RecommendationLayout = ({
       );
       setIsBookmarked(isBookmarked);
     } catch (error) {
-      console.error("Bookmark fetch error:", error);
     }
   }, [title, name, recommendationType]);
 
@@ -72,7 +71,6 @@ const RecommendationLayout = ({
         text2: `Bookmark ${isBookmarked ? 'removed' : 'added'} successfully ✅`,
       });
     } catch (error) {
-      console.error("Bookmark error:", error);
       Toast.show({
         type: "error",
         text1: "Error",
@@ -90,7 +88,6 @@ const RecommendationLayout = ({
           const response = await axios.get(`${BASE_URL}/api/tmdb/series/${id}`);
           setSeriesDetails(response.data); 
         } catch (error) {
-          console.error("Series details error:", error);
         }
       };
       fetchSeriesDetails();
