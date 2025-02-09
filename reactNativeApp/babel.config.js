@@ -9,8 +9,7 @@ module.exports = function (api) {
         ['module:react-native-dotenv', {
           moduleName: '@env',
           path: '.env',
-        }],
-        ["transform-remove-console", { "exclude": ["error", "warn"] }],
+        }]
       ],
     };
   };
