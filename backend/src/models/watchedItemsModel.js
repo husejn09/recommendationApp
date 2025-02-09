@@ -7,7 +7,7 @@ const WatchedModel = {
     try {
       console.log("Executing query to fetch watched items for userId:", userId);
       const { rows } = await pool.query(
-        'SELECT * FROM watched_items WHERE user_id = $1',
+        'SELECT item_id, type, status, poster_path FROM watched_items WHERE user_id = $1',
         [userId]
       );
       console.log("Query result:", rows);
@@ -21,7 +21,7 @@ const WatchedModel = {
   async toggle(userId, item) {
     try {
       const existing = await pool.query(
-        'SELECT * FROM watched_items WHERE user_id = $1 AND item_id = $2',
+        'SELECT item_id, type, status, poster_path FROM watched_items WHERE user_id = $1 AND item_id = $2',
         [userId, item.id]
       );
 
