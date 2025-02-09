@@ -21,7 +21,7 @@ const SignIn = () => {
     try {
       console.log("Sending request to:", `${BASE_URL}/users/login`);
       const response = await api.post(`/users/login`, {
-        email: form.email.toLowerCase(),
+        email: form.email,
         password: form.password,
       });
 

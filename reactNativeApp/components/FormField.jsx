@@ -20,7 +20,8 @@ const FormField = ({title, value, placeholder, handleChangeText, otherStyles}) =
             onChangeText={handleChangeText}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
-            
+            autoCapitalize="none"
+            autoCorrect={false}
             />
             
         {title === "Password" && (
