@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { View, Text, TouchableOpacity, Image, Modal, FlatList, ScrollView } from "react-native";
 import starIcon from "../assets/star.png";
 import dotIcon from "../assets/dot.png";
@@ -8,82 +8,96 @@ import { INSERT_BOOKMARK_URL, DELETE_BOOKMARK_URL, BASE_URL } from "@env";
 import * as SecureStore from 'expo-secure-store';
 import Toast from 'react-native-toast-message';
 
-const RecommendationLayout = ({ title, poster, genres, rating, releaseYear, overview, name, recommendationType }) => {
+
+const RecommendationLayout = ({ 
+  id, 
+  title, 
+  poster, 
+  genres, 
+  rating, 
+  releaseYear, 
+  overview, 
+  name, 
+  recommendationType 
+}) => {
+
+  // State management
   const [moreInfo, setMoreInfo] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [userId, setUserId] = useState("");
+  const [seriesDetails, setSeriesDetails] = useState(null);
 
+  // Load user data
   useEffect(() => {
-    const getUserData = async () => {
-      const name = await SecureStore.getItemAsync("userId");
-      if (name) {
-        setUserId(name);
-        fetchBookmarks(name);
+    const loadUserData = async () => {
+      const userId = await SecureStore.getItemAsync("userId");
+      if (userId) {
+        setUserId(userId);
+        await fetchBookmarks(userId);
       }
     };
+    loadUserData();
+  }, [ fetchBookmarks]);
 
-    getUserData();
-  }, []);
-
-  // function for fetching user bookmarks and keeping up with it, if the user fetches movies/series again it will know which is already bookmarked
-  const fetchBookmarks = async (userId) => {
+  // Fetch bookmarks
+  const fetchBookmarks = useCallback(async (userId) => {
     try {
       const response = await axios.get(`${BASE_URL}/bookmarks/${userId}`);
-      const bookmarks = response.data.bookmarks;
-      const isItemBookmarked = bookmarks.some(
-        (b) => b.data.title === (title || name) && b.type === recommendationType
+      const isBookmarked = response.data.bookmarks.some(
+        b => b.data.title === (title || name) && b.type === recommendationType
       );
-      setIsBookmarked(isItemBookmarked);
+      setIsBookmarked(isBookmarked);
     } catch (error) {
-      console.error("Error fetching bookmarks:", error);
+      console.error("Bookmark fetch error:", error);
+    }
+  }, [title, name, recommendationType]);
+
+  // Handle bookmark toggle
+  const handleBookmarkPress = async () => {
+    try {
+      const endpoint = isBookmarked ? DELETE_BOOKMARK_URL : INSERT_BOOKMARK_URL;
+      await axios.post(endpoint, {
+        user_id: userId,
+        title: title || name,
+        type: recommendationType,
+        ...(!isBookmarked && {
+          data: { title: title || name, poster, genres, rating, releaseYear, overview, id}
+        })
+      });
+      
+      setIsBookmarked(!isBookmarked);
+      Toast.show({
+        type: "success",
+        text1: "Success!",
+        text2: `Bookmark ${isBookmarked ? 'removed' : 'added'} successfully ✅`,
+      });
+    } catch (error) {
+      console.error("Bookmark error:", error);
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Failed to update bookmark",
+      });
     }
   };
 
-  const handleBookmarkPress = async () => {
-    if (isBookmarked) {
-      try {
-        await axios.post(`${DELETE_BOOKMARK_URL}`, {
-          user_id: userId,
-          title: title || name,
-          type: recommendationType
-        });
-        setIsBookmarked(false);
-        setMoreInfo(false); 
-        Toast.show({
-          type: "success",
-          text1: "Success!",
-          text2: "Bookmark removed successfully ✅",
-        });
-      } catch (error) {
-        console.error("Error removing bookmark:", error);
-      }
-    } else {
-      try {
-        await axios.post(`${INSERT_BOOKMARK_URL}`, {
-          user_id: userId,
-          type: recommendationType,
-          data: {
-            title: title || name,
-            poster,
-            genres,
-            rating,
-            releaseYear,
-            overview,
-          },
-        });
-        setIsBookmarked(true);
-        setMoreInfo(false); 
-        Toast.show({
-          type: "success",
-          text1: "Success!",
-          text2: "Bookmark added successfully ✅",
-        });
-      } catch (error) {
-        console.error("Error adding bookmark:", error);
-      }
+
+  // Load series details when needed
+  useEffect(() => {
+    if (recommendationType === 'series' && moreInfo && id) { 
+      const fetchSeriesDetails = async () => {
+        try {
+          const response = await axios.get(`${BASE_URL}/api/tmdb/series/${id}`);
+          setSeriesDetails(response.data); 
+        } catch (error) {
+          console.error("Series details error:", error);
+        }
+      };
+      fetchSeriesDetails();
     }
-  };
-  const [watched, setWatched] = useState(false);
+  }, [id, moreInfo, recommendationType]);
+
+
   return (
     <>
       <View className="w-1/2 p-2">
@@ -105,7 +119,7 @@ const RecommendationLayout = ({ title, poster, genres, rating, releaseYear, over
               resizeMode="contain"
               tintColor={"orange"}
             />
-            <Text className="text-white ml-2">{rating}</Text>
+            <Text className="text-white ml-2">{rating?.toFixed(1)}</Text>
             <Image
               source={dotIcon}
               className="w-1 h-1 mx-2"
@@ -116,8 +130,8 @@ const RecommendationLayout = ({ title, poster, genres, rating, releaseYear, over
         </TouchableOpacity>
 
         <Modal visible={moreInfo} animationType="fade" transparent={true}>
-          <View className="flex-1 justify-center items-center bg-black/80 p-6 ">
-            <ScrollView className="bg-gray-900 p-6 rounded-lg w-full ">
+          <View className="flex-1 justify-center items-center bg-black/80 p-6">
+            <ScrollView className="bg-gray-900 p-6 rounded-lg w-full">
               <Image
                 source={{ uri: poster }}
                 className="w-full h-[430px] rounded-lg"
@@ -132,7 +146,7 @@ const RecommendationLayout = ({ title, poster, genres, rating, releaseYear, over
                   resizeMode="contain"
                   tintColor={"orange"}
                 />
-                <Text className="text-white ml-2">{rating}</Text>
+                <Text className="text-white ml-2">{rating?.toFixed(1)}</Text>
                 <Image
                   source={dotIcon}
                   className="w-2 h-2 mx-2"
@@ -141,7 +155,7 @@ const RecommendationLayout = ({ title, poster, genres, rating, releaseYear, over
                 <Text className="text-white">{releaseYear}</Text>
               </View>
 
-              <Text className="text-white text-xl mt-4 mb-2">Genres</Text>
+              <Text className="text-white text-xl mt-4 mb-2 font-semibold">Genres</Text>
               <FlatList
                 data={genres}
                 keyExtractor={(item, index) => index.toString()}
@@ -153,18 +167,39 @@ const RecommendationLayout = ({ title, poster, genres, rating, releaseYear, over
                 )}
               />
 
-              <Text className="text-white text-xl mt-4 mb-1">Overview</Text>
+              <Text className="text-white text-xl mt-4 mb-1 font-semibold">Overview</Text>
               <Text className="text-white text-md">{overview}</Text>
 
-              <TouchableOpacity
-                onPress={() => setWatched(!watched)}
-                className="bg-gray-700 p-2 rounded-lg mt-4"
-              >
-                <Text className="text-white">
-                  {watched ? "✓ Watched" : "Mark as Watched"}
-                </Text>
-              </TouchableOpacity>
-              
+              {recommendationType === "series" && (
+                <View className="mt-2 space-y-2">
+                    <Text className="text-white text-xl mt-4 mb-1 font-semibold">Stats</Text>
+                  <Text className="text-white text-md">
+                    Seasons: {seriesDetails?.seasons || "N/A"}
+                  </Text>
+                  <Text className="text-white text-md">
+                    Episodes: {seriesDetails?.episodes || "N/A"}
+                  </Text>
+                  <Text className="text-white text-md">
+                    Status: {seriesDetails?.status || "N/A"}
+                  </Text>
+                  <Text className="text-white text-md ">
+                    Airing: {seriesDetails?.air_years || "N/A"}
+                  </Text>
+                  <Text className="text-white text-md ">
+                    Last episode was on: {seriesDetails?.last_air_date || "N/A"}
+                  </Text>
+
+                  
+                    
+
+                  {seriesDetails?.status === "Ended" && (
+                    <Text className="text-red-400 mt-2 text-center text-lg">
+                      This show has ended
+                    </Text>
+                  )}
+                </View>
+              )}
+
               <View className="flex-row justify-between mt-12 pb-10">
                 <TouchableOpacity onPress={handleBookmarkPress}>
                   <Image
@@ -181,12 +216,10 @@ const RecommendationLayout = ({ title, poster, genres, rating, releaseYear, over
                   <Text className="text-white text-lg">Close</Text>
                 </TouchableOpacity>
               </View>
-
             </ScrollView>
           </View>
         </Modal>
       </View>
-      <Toast position="bottom" bottomOffset={20} visibilityTime={1000} />
     </>
   );
 };

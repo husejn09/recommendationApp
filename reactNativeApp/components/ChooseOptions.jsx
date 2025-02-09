@@ -1,6 +1,5 @@
 import { View, Text, FlatList, Modal, TouchableOpacity, TouchableWithoutFeedback, ScrollView } from 'react-native';
-import React, { useState, useRef } from 'react';
-import ChooseButton from './ChooseButton';
+import React, { useState, useRef, useEffect } from 'react';
 import RecommendationLayout from './RecommendationLayout';
 import axios from "axios";
 import { MOVIES, SERIES } from '@env';
@@ -10,8 +9,6 @@ import { Animated } from 'react-native';
 const ChooseOptions = ({ recommendationType}) => {
   // Data and loading states
   const [dataFromAPI, setDataFromAPI] = useState([]);
-  
-  const heightValue = useRef(new Animated.Value(0)).current;
 
   const [loading, setLoading] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -110,18 +107,11 @@ const ChooseOptions = ({ recommendationType}) => {
     } catch (error) {
       console.error("Error fetching recommendations:", error.response?.data || error.message);
     } finally {
-        Animated.timing(heightValue, {
-            toValue: 1,
-            duration: 500,
-            useNativeDriver: false,
-          }).start();
-      setShowRecomm(true);
-
+        setShowRecomm(true);
       setLoading(false);
     }
   };
-
-
+  
   return (
     <>
       <Toast position="bottom" bottomOffset={20} />
