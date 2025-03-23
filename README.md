@@ -81,7 +81,9 @@ Upon opening the app, users can sign in or sign up to save their preferences and
 After logging in, users can select Movies or Series for personalized recommendations based on mood and genre.
 Users can view movie/series recommendations, save their favorites, and track their watched or in-progress items.
 
-## Screenshots
+## Demo video
+
+[![Project Overview Watch Demo](https://img.youtube.com/vi/zGpDK_3ftWw/0.jpg)](https://www.youtube.com/watch?v=zGpDK_3ftWw) 
 
 ## Contributing
 
